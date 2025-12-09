@@ -1,0 +1,93 @@
+package runner;
+
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.aventstack.extentreports.ExtentReports;
+import com.aventstack.extentreports.ExtentTest;
+
+import utils.*;
+
+
+public class TestRunner extends Base {
+    public ExtentReports report;
+    public ExtentTest test;
+    public WebDriverHelper helper;
+    @BeforeMethod
+    public void setup(){
+        openBrowser();
+        report = Reporter.generateExtentReport("Agronetto_Test");
+        helper = new WebDriverHelper(driver);
+    }
+    @Test(priority = 1)
+    public void test1() throws Exception{
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        test = report.createTest("Test Case 1: Verify Seller Popup");
+        WebElement login=driver.findElement(By.xpath("(//div[@class='login-button js-hrf'])[1]"));
+        login.click();
+        LoggerHandler.info("click on signin");
+        WebElement pic=driver.findElement(By.xpath("//a[@class=\"example-company\"]"));
+        pic.click();
+        Thread.sleep(2000); 
+        Set<String> st=driver.getWindowHandles();
+        List<String> li=new ArrayList<>(st);
+        driver.switchTo().window(li.get(1));
+        WebElement selleer=driver.findElement(By.xpath("//a[@class='verified-dealer-title js-link-into-dialog']"));
+        selleer.click();
+        Thread.sleep(2000); 
+        WebElement pop1=driver.findElement(By.xpath("//a[normalize-space()='Contact the seller']"));
+        pop1.click();
+        Thread.sleep(2000); 
+        Screenshot.captureScreenShot("agronetto_screenshot");
+        Reporter.attachScreenshotToReport("agronetto_screenshot", test, "Verification of Contact Seller popup");
+        
+        test.pass("Popup verified and screenshot attached");
+    }
+     @Test(priority = 2)
+     public void test2() throws Exception{
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        WebElement blog=driver.findElement(By.xpath("//a[normalize-space()='Blog']"));
+        blog.click();
+        Thread.sleep(3000);
+        helper.hoverOverElement(By.xpath("(//div[@class='project-curr'][normalize-space()='Blog about farm equipment'])[1]"));
+        WebElement h1=driver.findElement(By.xpath("//li[@id='menu-item-1538']//a[normalize-space()='Blog about warehouse equipment']"));
+        h1.click();
+        Set<String> set=driver.getWindowHandles();
+        List<String> li=new ArrayList<>(set);
+        driver.switchTo().window(li.get(1));
+        WebElement bus=driver.findElement(By.xpath("(//a)[9]"));
+        bus.click();
+        Screenshot.captureScreenShot("test2Noresult");
+
+     }
+    @Test(priority = 3)
+    public void test3() throws Exception{
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        WebElement nav=driver.findElement(By.xpath("//div[normalize-space()='Spare parts']"));
+        nav.click();
+        Thread.sleep(1000);
+        WebElement input=driver.findElement(By.xpath("//input[@placeholder='part number, brand, model, spare part']"));
+        input.sendKeys("37178");
+        input.submit();
+        WebElement dropdownbtn=driver.findElement(By.xpath("//div[@class='sl-header-button sl-orders-select sl-header-button_loaded']"));
+        dropdownbtn.click();
+        WebElement d=driver.findElement(By.xpath("//span[normalize-space()='Least expensive on top']"));
+        d.click();
+    }
+
+    @AfterMethod
+    public void setclose(){
+        if(driver!=null)
+        driver.quit();
+        if (report != null) report.flush(); 
+
+    }
+}
